@@ -29,9 +29,7 @@ function PDFDocumentSignedPage() {
     const ability = useContext(AbilityContext)
     const router = useRouter();
 
-    useEffect(() => {
-        
-    }, []);
+   
 
      const handleViewClick = (fileId: string) => {
         router.push(`pdf-documents/view/${fileId}`);

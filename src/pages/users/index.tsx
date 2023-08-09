@@ -7,7 +7,6 @@ import {Document, Page, pdfjs} from 'react-pdf';
 import { fetchSignature } from 'src/lib/api';
 import { config } from "../../configs/config";
 import TableUserServerSide from 'src/views/table/TableUserServerSide';
-import { AbilityContext } from 'src/layouts/components/acl/Can';
 
 const { API_URL } = config;
 
@@ -26,13 +25,10 @@ import  Icon from 'src/@core/components/icon';
 
 
 function UsersPage() {
-    const ability = useContext(AbilityContext)
+   
     const router = useRouter();
 
-    useEffect(() => {
-        
-    }, []);
-
+  
      const handleViewClick = (fileId: string) => {
         router.push(`pdf-documents/view/${fileId}`);
      }

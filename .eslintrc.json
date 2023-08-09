@@ -9,13 +9,15 @@
     "@next/next/no-img-element": "off",
     "react/no-unescaped-entities": "off",
     "import/no-anonymous-default-export": "off",
-    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-unused-vars": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
+    "padding-line-between-statements": "off",
+    "no-empty=function": "off",
     // add new line above comment
     "lines-around-comment": [
-      "error",
+      "off",
       {
         "beforeLineComment": true,
         "beforeBlockComment": true,
@@ -26,16 +28,16 @@
       }
     ],
     // add new line above return
-    "newline-before-return": "error",
+    "newline-before-return": "off",
     // add new line below import
     "import/newline-after-import": [
-      "error",
+      "off",
       {
         "count": 1
       }
     ],
     "@typescript-eslint/ban-types": [
-      "error",
+      "off",
       {
         "extendDefaults": true,
         "types": {

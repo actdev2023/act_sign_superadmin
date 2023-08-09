@@ -1,4 +1,5 @@
 import { config } from "../configs/config";
+import Cookies from "js-cookie";
 
 const { API_URL } = config;
 
@@ -45,6 +46,8 @@ export async function loginUser( email: string, password: string ) {
 
     const data = await response.json();
 
-    localStorage.setItem('token', data.token);
+    console.log('token', data.token);
+
+    Cookies.set("jwt_token", data.token, { expires: 1, secure: true });
 }
 

@@ -129,7 +129,7 @@ const VerticalNavLink = ({
   }
 
   return (
-    <CanViewNavLink navLink={item}>
+    <CanViewNavLink >
       <ListItem
         disablePadding
         className='nav-link'

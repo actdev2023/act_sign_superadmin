@@ -285,12 +285,13 @@ function PDFDocumentView() {
 
                 
                 toast.success('Signed PDF uploaded successfully');
+                router.push('/signed-documents/');
 
                 //Generate URL for the modified PDF
-                const modifiedPdfUrl = URL.createObjectURL(new Blob([modifiedPdfData], { type: 'application/pdf' }));
+                //const modifiedPdfUrl = URL.createObjectURL(new Blob([modifiedPdfData], { type: 'application/pdf' }));
 
                 //Open new window
-                window.open(modifiedPdfUrl);
+                //window.open(modifiedPdfUrl);
             } else {
                 console.error('Error uploading signed PDF:', response2.status);
             }
@@ -363,9 +364,6 @@ function PDFDocumentView() {
         </Grid>
     )
 }
-PDFDocumentView.acl = {
-    action: 'read',
-    subject: 'apply-signature'
-  }
+
 
 export default PDFDocumentView

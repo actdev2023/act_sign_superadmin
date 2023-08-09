@@ -227,7 +227,7 @@ const VerticalNavGroup = (props: Props) => {
   }
 
   return (
-    <CanViewNavGroup navGroup={item}>
+    <CanViewNavGroup>
       <Fragment>
         <ListItem
           disablePadding

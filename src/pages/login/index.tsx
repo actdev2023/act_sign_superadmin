@@ -1,5 +1,11 @@
 // ** React Imports
 import { useState, ReactNode, MouseEvent } from 'react'
+import { loginUser } from 'src/lib/api';
+import { useRouter } from 'next/router';
+import { config } from "../../configs/config";
+import Cookies from "js-cookie";
+
+const { API_URL } = config;
 
 // ** Next Imports
 import Link from 'next/link'
@@ -31,7 +37,6 @@ import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 
 // ** Hooks
-import { useAuth } from 'src/hooks/useAuth'
 import useBgColor from 'src/@core/hooks/useBgColor'
 import { useSettings } from 'src/@core/hooks/useSettings'
 
@@ -86,12 +91,12 @@ const FormControlLabel = styled(MuiFormControlLabel)<FormControlLabelProps>(({ t
 
 const schema = yup.object().shape({
   email: yup.string().email().required(),
-  password: yup.string().min(5).required()
+  password: yup.string().min(4).required()
 })
 
 const defaultValues = {
-  password: 'admin',
-  email: 'admin@vuexy.com'
+  password: '1234',
+  email: 'admin@gmail.com'
 }
 
 interface FormData {
@@ -102,9 +107,12 @@ interface FormData {
 const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState<boolean>(true)
   const [showPassword, setShowPassword] = useState<boolean>(false)
+  const router = useRouter();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   // ** Hooks
-  const auth = useAuth()
+  // const auth = useAuth()
   const theme = useTheme()
   const bgColors = useBgColor()
   const { settings } = useSettings()
@@ -116,7 +124,6 @@ const LoginPage = () => {
   const {
     control,
     setError,
-    handleSubmit,
     formState: { errors }
   } = useForm({
     defaultValues,
@@ -124,14 +131,37 @@ const LoginPage = () => {
     resolver: yupResolver(schema)
   })
 
-  const onSubmit = (data: FormData) => {
-    const { email, password } = data
-    auth.login({ email, password, rememberMe }, () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+   
+    
+    try {
+      const response = await fetch(`${API_URL}/api/users/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('token', data.token);
+        Cookies.set("jwt_token", data.token, { expires: 1, secure: true });
+        
+        router.push('/home');
+      } else {
+        console.error("Login failed.");
+      }
+      
+    } catch (error) {
+      console.error('Error during login:', error);
       setError('email', {
         type: 'manual',
         message: 'Email or Password is invalid'
       })
-    })
+    }
+    
   }
 
   const imageSource = skin === 'bordered' ? 'auth-v2-login-illustration-bordered' : 'auth-v2-login-illustration'
@@ -199,18 +229,18 @@ const LoginPage = () => {
                 {`Welcome to ${themeConfig.templateName}! 👋🏻`}
               </Typography>
               <Typography sx={{ color: 'text.secondary' }}>
-                Please sign-in to your account and start the adventure
+                Please sign-in to your account 
               </Typography>
             </Box>
-            <Alert icon={false} sx={{ py: 3, mb: 6, ...bgColors.primaryLight, '& .MuiAlert-message': { p: 0 } }}>
+            {/* <Alert icon={false} sx={{ py: 3, mb: 6, ...bgColors.primaryLight, '& .MuiAlert-message': { p: 0 } }}>
               <Typography variant='body2' sx={{ mb: 2, color: 'primary.main' }}>
                 Admin: <strong>admin@vuexy.com</strong> / Pass: <strong>admin</strong>
               </Typography>
-              {/* <Typography variant='body2' sx={{ color: 'primary.main' }}>
+              <Typography variant='body2' sx={{ color: 'primary.main' }}>
                 Client: <strong>client@vuexy.com</strong> / Pass: <strong>client</strong>
-              </Typography> */}
-            </Alert>
-            <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
+              </Typography>
+            </Alert> */}
+            <form noValidate autoComplete='off' onSubmit={handleSubmit}>
               <FormControl fullWidth sx={{ mb: 4 }}>
                 <Controller
                   name='email'
@@ -220,11 +250,11 @@ const LoginPage = () => {
                     <TextField
                       autoFocus
                       label='Email'
-                      value={value}
+                      value={email}
                       onBlur={onBlur}
-                      onChange={onChange}
+                      onChange={(e) => setEmail(e.target.value)}
                       error={Boolean(errors.email)}
-                      placeholder='admin@vuexy.com'
+                      placeholder='sample@gmail.com'
                     />
                   )}
                 />
@@ -240,10 +270,10 @@ const LoginPage = () => {
                   rules={{ required: true }}
                   render={({ field: { value, onChange, onBlur } }) => (
                     <OutlinedInput
-                      value={value}
+                      value={password}
                       onBlur={onBlur}
                       label='Password'
-                      onChange={onChange}
+                      onChange={(e) => setPassword(e.target.value)}
                       id='auth-login-v2-password'
                       error={Boolean(errors.password)}
                       type={showPassword ? 'text' : 'password'}
@@ -347,6 +377,6 @@ const LoginPage = () => {
 
 LoginPage.getLayout = (page: ReactNode) => <BlankLayout>{page}</BlankLayout>
 
-LoginPage.guestGuard = true
+
 
 export default LoginPage

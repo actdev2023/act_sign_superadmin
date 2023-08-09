@@ -51,7 +51,7 @@ const Form = styled('form')(() => ({
    border: `1px solid #333` 
 }))
 
-const addUserPage = () => {
+const AddUserPage = () => {
 
     const [values, setValues] = useState<State>({
         password: '',
@@ -200,4 +200,4 @@ const addUserPage = () => {
     )
 }
 
-export default addUserPage
+export default AddUserPage;

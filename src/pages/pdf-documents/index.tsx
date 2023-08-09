@@ -7,7 +7,6 @@ import {Document, Page, pdfjs} from 'react-pdf';
 import { fetchSignature } from 'src/lib/api';
 import { config } from "../../configs/config";
 import TablePdfServerSide from 'src/views/table/TablePdfServerSide';
-import { AbilityContext } from 'src/layouts/components/acl/Can';
 
 const { API_URL } = config;
 
@@ -26,12 +25,10 @@ import  Icon from 'src/@core/components/icon';
 
 
 function PDFDocumentPage() {
-    const ability = useContext(AbilityContext)
+
     const router = useRouter();
 
-    useEffect(() => {
-        
-    }, []);
+  
 
      const handleViewClick = (fileId: string) => {
         router.push(`pdf-documents/view/${fileId}`);
@@ -67,9 +64,6 @@ function PDFDocumentPage() {
         </Grid>
     )
 }
-PDFDocumentPage.acl = {
-    action: 'read',
-    subject: 'pdf-list'
-  }
+
 
 export default PDFDocumentPage
