@@ -7,6 +7,7 @@ import {Document, Page, pdfjs} from 'react-pdf';
 import { fetchSignature } from 'src/lib/api';
 import { config } from "../../configs/config";
 import TableUserServerSide from 'src/views/table/TableUserServerSide';
+import withAuth from 'src/context/withAuth';
 
 const { API_URL } = config;
 
@@ -64,4 +65,4 @@ function UsersPage() {
 }
 
 
-export default UsersPage
+export default withAuth(UsersPage);

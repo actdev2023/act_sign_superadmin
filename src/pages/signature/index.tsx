@@ -2,6 +2,7 @@ import React, { useState, ChangeEvent, FormEvent, useEffect, useContext } from '
 import { fetchSignature } from 'src/lib/api';
 import Image from 'next/image';
 import { config } from "../../configs/config";
+import withAuth from 'src/context/withAuth';
 
 const { API_URL } = config;
 
@@ -84,4 +85,4 @@ const SignaturePage = () => {
 }
 
 
-export default SignaturePage
+export default withAuth(SignaturePage);
