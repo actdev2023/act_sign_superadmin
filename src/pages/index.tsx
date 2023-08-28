@@ -25,12 +25,9 @@ const Home = () => {
   const router = useRouter()
 
   useEffect(() => {
-    // if (auth.user && router.route === '/') {
-    //   router.replace('/home')
-    // }
-
-  
-     
+    if (router.route === '/') {
+      router.replace('/home')
+    }
 
       // Redirect user to Home URL
     

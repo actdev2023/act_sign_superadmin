@@ -9,6 +9,9 @@ import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/router';
 import Select from 'react-select';
 import SelectWithSearch from 'src/views/select/SelectWithSearch';
+import interact from 'interactjs';
+import Draggabble from 'react-draggable';
+
 
 
 
@@ -37,6 +40,7 @@ import Icon from 'src/@core/components/icon';
 import DatePicker, { ReactDatePickerProps } from 'react-datepicker';
 import CustomInput from '../../views/pickers/PickersCustomInput';
 import { DateType } from 'src/types/forms/reactDatepickerTypes';
+import pdfDocuments from '.';
 
 
 pdfjs.GlobalWorkerOptions.workerSrc = `http://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
@@ -46,12 +50,14 @@ interface Stamp {
     y: number;
     width: number;
     height: number;
+    rotate: number;
 }
 
 interface DateText {
     date_x: number;
     date_y: number;
     date_size: number;
+    date_rotate: number;
 }
 
 interface Option {
@@ -78,11 +84,13 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
         y: 650,
         width: 200,
         height: 50,
+        rotate: 0,
     });
     const [dateText, setDateText] = useState<DateText>({
         date_x: 0,
         date_y: 650,
         date_size: 20,
+        date_rotate: 0,
     });
     const [title, setTitle] = useState<string>('');
     const [startPage, setStartPage] = useState(1);
@@ -92,7 +100,9 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [options, setOptions] = useState<Option[]>([]);
     const [selectedOption, setSelectedOption] = useState<Option | null>(null);
-    const [date, setDate] = useState<DateType>(new Date())
+    const [date, setDate] = useState<DateType>(new Date());
+    const [addingStamp, setAddingStamp] = useState(false);
+    const [pageDimension, setPageDimension] = useState<{width: number; height: number }[]>([]);
 
     const handleSelectChange = (selectedOption: Option | null) => {
         setSelectedOption(selectedOption);
@@ -115,6 +125,7 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
             formData.append('y', stamp.y.toString());
             formData.append('width', stamp.width.toString());
             formData.append('height', stamp.height.toString());
+            formData.append('rotate', stamp.rotate.toString());
             formData.append('title', title);
             formData.append('page_number', applyToAllPages ? '1' : '0');
             formData.append('page_start', startPage.toString());
@@ -124,6 +135,7 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
             formData.append('date_x', dateText.date_x.toString());
             formData.append('date_y', dateText.date_y.toString());
             formData.append('date_size', dateText.date_size.toString());
+            formData.append('date_rotate', dateText.date_rotate.toString());
 
             try {
                 await fetch(`${API_URL}/api/files`, {
@@ -156,6 +168,7 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
             y: 650,
             width: 200,
             height: 50,
+            rotate: 90,
         });
 
         try {
@@ -184,16 +197,90 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
         }));
     };
 
-    const renderStampPreview = (pageNumber: number) => {
-        if(applyToAllPages || pageNumber >= startPage && pageNumber <= endPage){
-            const { x, y, width, height } = stamp;
+    const handleStampPositionChange = (e: any, data: any, x: number, y: number) => {
+        setStamp((prevStamp) => ({
+            ...prevStamp,
+            x: x,
+            y: y,
+        }));
+    }
+
+   
+
+    const renderStampPreview = (pageNumber: number,  stamp: Stamp) => {
+        if(addingStamp && (applyToAllPages || (pageNumber >= startPage && pageNumber <= endPage))){
+            const { x, y, width, height, rotate } = stamp;
+
+        
+
+           
+           
             return (
+
                 <div
-                    className="stamp-preview"
-                    style={{ left: x, top: y, width, height, position: 'absolute', border: '2px dashed red' }}
-                >
-                    Signature Preview
-                </div>
+                key='stamp'
+                className='stamp-preview custom-stamp-style'
+                
+                style={{
+                    left: x,
+                    top: y,
+                    width,
+                    height,
+                    position: 'absolute',
+                    border: '2px dashed red',
+                    zIndex: 1000,
+                    transform: `rotate(${rotate}deg)`
+                }}
+                ref={(element) => {
+                    if (element) {
+                        interact(element).draggable({
+                            onmove: (event) => {
+                                const target = event.target;
+                                const { dx, dy } = event;
+
+                                const newX = x + dx;
+                                const newY = y + dy;
+
+                                setStamp((prevStamp) => ({
+                                    ...prevStamp,
+                                    x: newX,
+                                    y: newY,
+                                }));
+
+                                target.style.left = newX + 'px';
+                                target.style.top = newY + 'px';
+                            },
+                        });
+                    }
+                }}
+            >
+                Signature Preview
+            </div>
+                 
+                    // <Draggabble
+                    //     bounds="parent"
+                    //     onStop={(e, data) => handleStampPositionChange(e, data, x, y )}
+                    //     position={{ x, y }}
+                        
+                    
+                       
+                    // >
+                    //     <div
+                    //         className='stamp-preview custom-stamp-style'
+                            
+                    //         style={{
+                    //             width,
+                    //             height,
+                    //             position: 'absolute',
+                    //             border: '2px dashed red',
+                    //             zIndex: 1000,
+                    //             transform: `rotate(${rotate}deg)`
+                    //         }}
+                    //     >
+                    //         Signature Preview
+                    //     </div>
+                    // </Draggabble>
+               
             );
         }
         return null;
@@ -201,11 +288,11 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
 
     const renderDatePreview = (pageNumber: number) => {
         if(applyToAllPages || pageNumber >= startPage && pageNumber <= endPage){
-            const { date_x, date_y, date_size } = dateText;
+            const { date_x, date_y, date_size, date_rotate } = dateText;
             return (
                 <div
                     className="stamp-preview"
-                    style={{ left: date_x, top: date_y, fontSize: date_size+'px', position: 'absolute', border: '2px dashed red' }}
+                    style={{ left: date_x, top: date_y, transform: `rotate(${date_rotate}deg)`, fontSize: date_size+'px', position: 'absolute', border: '2px dashed red' }}
                 >
                     {date?.toLocaleDateString()}
                 </div>
@@ -214,7 +301,7 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
         return null;
     }
     
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, noClick: true, });
 
     useEffect(() => {
 
@@ -222,17 +309,7 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
             .then((response) => response.json())
             .then((data) => setOptions(data))
             .catch((error) => console.error('Error fetching options:', error));
-        const fetchData = async () => {
-            try {
-                const signature = await fetchSignature('1');
-                setSignature(signature);
-            } catch (error) {
-                console.error('Error fetching signature', error);
-            }
-        };
-
         
-        fetchData();
 
         return () => {
             pdfjs.GlobalWorkerOptions.workerSrc = ``;
@@ -243,8 +320,28 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
 
     
 
-        const handleDocumentLoadSuccess = ({ numPages}: { numPages: number}) => {
+        const handleDocumentLoadSuccess = async ({ numPages}: { numPages: number}) => {
             setNumPages(numPages);
+            // const pdfBytes = await fetch(pdfUrl).then((response) => response.arrayBuffer());
+            // const pdfData = new Uint8Array(pdfBytes);
+            // if (!pdfData) return;
+            // const pdfDoc = await PDFDocument.load(pdfData);
+
+            // const newPageDimensions = [];
+            // for(let pageNumber = 1; pageNumber <= numPages; pageNumber++) {
+            //     const page = pdfDocuments.getPage(pageNumber - 1);
+            // }
+        }
+
+        
+
+        const handleStampDrag = (e: any, data: any) => {
+            const { name, value } = e.target;
+        setStamp((prevStamp) => ({
+            ...prevStamp,
+            x: data.x,
+            y: data.y,
+        }));
         }
 
      
@@ -312,6 +409,17 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
                             Set Signature location & size
                             </Typography>
                             <Grid container spacing={4} sx={{ mb: 4 }}>
+                                <Grid item xl={12} md={12} xs={12} >
+                                    <Button
+                                    fullWidth
+                                    variant='contained'
+                                    onClick={() => setAddingStamp(!addingStamp)}
+                                    endIcon={<Icon icon='tabler:signature' />}
+                                    >
+                                       {addingStamp ? 'Cancel' : 'Add Stamp'}
+                                    </Button>
+                                    
+                                </Grid>
                                 <Grid item xl={6} md={6} xs={12} >
                                     <TextField
                                         id='outlined-basic-2' 
@@ -320,6 +428,7 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
                                         name='x'
                                         value={stamp.x}
                                         onChange={handleStampChange}
+                                        disabled
                                     />
                                 </Grid>
                                 <Grid item xl={6} md={6} xs={12} >
@@ -330,6 +439,7 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
                                         name='y'
                                         value={stamp.y}
                                         onChange={handleStampChange}
+                                        disabled
                                     />
                                 </Grid>
                             </Grid>
@@ -351,6 +461,16 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
                                         type='number'
                                         name='height'
                                         value={stamp.height}
+                                        onChange={handleStampChange}
+                                    />
+                                </Grid>
+                                <Grid item xl={6} md={6} xs={12} >
+                                    <TextField
+                                        id='outlined-basic-10' 
+                                        label='Rotate'
+                                        type='number'
+                                        name='rotate'
+                                        value={stamp.rotate}
                                         onChange={handleStampChange}
                                     />
                                 </Grid>
@@ -385,21 +505,31 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
                                 </Grid>
                                 <Grid item xl={4} md={4} xs={12} >
                                     <TextField
-                                        id='outlined-basic' 
+                                        id='outlined-basic-7' 
                                         label='Y'
                                         type='number'
-                                        name='y'
+                                        name='date_y'
                                         value={dateText.date_y}
                                         onChange={handleDateTextChange}
                                     />
                                 </Grid>
                                 <Grid item xl={4} md={4} xs={12} >
                                     <TextField
-                                        id='outlined-basic' 
+                                        id='outlined-basic-8' 
                                         label='Text Size'
                                         type='number'
                                         name='date_size'
                                         value={dateText.date_size}
+                                        onChange={handleDateTextChange}
+                                    />
+                                </Grid>
+                                <Grid item xl={4} md={4} xs={12} >
+                                    <TextField
+                                        id='outlined-basic-9' 
+                                        label='Rotate'
+                                        type='number'
+                                        name='date_rotate'
+                                        value={dateText.date_rotate}
                                         onChange={handleDateTextChange}
                                     />
                                 </Grid>
@@ -461,7 +591,7 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
                 </Card>
             </Grid>
             <Grid item xl={9} md={8} xs={12} >
-            <div {...getRootProps()}  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', overflow:'auto' }} >
+            <div {...getRootProps()}  style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow:'auto' }} >
                 {pdfUrl && (
                         <>
                             <Document file={pdfUrl} onLoadSuccess={handleDocumentLoadSuccess}>
@@ -470,9 +600,13 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
                                         key={index + 1} 
                                         pageNumber={index + 1} 
                                         width={600} 
+                                        height={700}
                                         renderTextLayer={false}
                                         renderAnnotationLayer={false} >
-                                        {renderStampPreview(index + 1)}
+                                       
+                                                {renderStampPreview(index + 1, stamp)}
+                                         
+                                        
                                         {renderDatePreview(index + 1)}
                                     </Page>
                                 ))}
