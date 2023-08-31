@@ -102,6 +102,7 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
     const [selectedOption, setSelectedOption] = useState<Option | null>(null);
     const [date, setDate] = useState<DateType>(new Date());
     const [addingStamp, setAddingStamp] = useState(false);
+    const [addingDate, setAddingDate] = useState(false);
     const [pageDimension, setPageDimension] = useState<{width: number; height: number }[]>([]);
 
     const handleSelectChange = (selectedOption: Option | null) => {
@@ -257,42 +258,50 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
                 Signature Preview
             </div>
                  
-                    // <Draggabble
-                    //     bounds="parent"
-                    //     onStop={(e, data) => handleStampPositionChange(e, data, x, y )}
-                    //     position={{ x, y }}
-                        
-                    
-                       
-                    // >
-                    //     <div
-                    //         className='stamp-preview custom-stamp-style'
-                            
-                    //         style={{
-                    //             width,
-                    //             height,
-                    //             position: 'absolute',
-                    //             border: '2px dashed red',
-                    //             zIndex: 1000,
-                    //             transform: `rotate(${rotate}deg)`
-                    //         }}
-                    //     >
-                    //         Signature Preview
-                    //     </div>
-                    // </Draggabble>
+                   
                
             );
         }
         return null;
     }
 
-    const renderDatePreview = (pageNumber: number) => {
-        if(applyToAllPages || pageNumber >= startPage && pageNumber <= endPage){
+    const renderDatePreview = (pageNumber: number, dateText: DateText) => {
+        if(addingDate && (applyToAllPages || (pageNumber >= startPage && pageNumber <= endPage))){
             const { date_x, date_y, date_size, date_rotate } = dateText;
             return (
                 <div
+                    key='dateText'
                     className="stamp-preview"
-                    style={{ left: date_x, top: date_y, transform: `rotate(${date_rotate}deg)`, fontSize: date_size+'px', position: 'absolute', border: '2px dashed red' }}
+                    style={{ 
+                        left: date_x, 
+                        top: date_y, 
+                        transform: `rotate(${date_rotate}deg)`, 
+                        fontSize: date_size+'px', 
+                        position: 'absolute', 
+                        border: '2px dashed red' 
+                    }}
+                    ref={(element) => {
+                        if (element) {
+                            interact(element).draggable({
+                                onmove: (event) => {
+                                    const target = event.target;
+                                    const { dx, dy } = event;
+    
+                                    const newX = date_x + dx;
+                                    const newY = date_y + dy;
+    
+                                    setDateText((prevStamp) => ({
+                                        ...prevStamp,
+                                        date_x: newX,
+                                        date_y: newY,
+                                    }));
+    
+                                    target.style.left = newX + 'px';
+                                    target.style.top = newY + 'px';
+                                },
+                            });
+                        }
+                    }}
                 >
                     {date?.toLocaleDateString()}
                 </div>
@@ -335,14 +344,7 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
 
         
 
-        const handleStampDrag = (e: any, data: any) => {
-            const { name, value } = e.target;
-        setStamp((prevStamp) => ({
-            ...prevStamp,
-            x: data.x,
-            y: data.y,
-        }));
-        }
+      
 
      
     return (
@@ -416,7 +418,7 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
                                     onClick={() => setAddingStamp(!addingStamp)}
                                     endIcon={<Icon icon='tabler:signature' />}
                                     >
-                                       {addingStamp ? 'Cancel' : 'Add Stamp'}
+                                       {addingStamp ? 'Cancel' : 'Add Signature'}
                                     </Button>
                                     
                                 </Grid>
@@ -490,6 +492,17 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
                                         placeholderText='Click to select date'
                                         customInput={<CustomInput />}
                                     />
+                                </Grid>
+                                <Grid item xl={12} md={12} xs={12} >
+                                    <Button
+                                    fullWidth
+                                    variant='contained'
+                                    onClick={() => setAddingDate(!addingDate)}
+                                    endIcon={<Icon icon='tabler:calendar' />}
+                                    >
+                                       {addingDate ? 'Cancel' : 'Add Date'}
+                                    </Button>
+                                    
                                 </Grid>
                             </Grid>
                             <Grid container spacing={4} sx={{ mb: 4 }}>
@@ -604,10 +617,8 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
                                         renderTextLayer={false}
                                         renderAnnotationLayer={false} >
                                        
-                                                {renderStampPreview(index + 1, stamp)}
-                                         
-                                        
-                                        {renderDatePreview(index + 1)}
+                                            {renderStampPreview(index + 1, stamp)}
+                                            {renderDatePreview(index + 1, dateText)}
                                     </Page>
                                 ))}
                                 
