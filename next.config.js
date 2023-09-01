@@ -29,5 +29,8 @@ module.exports = {
   },
   images: {
     domains: ['localhost'],
+  },
+  serverRuntimeConfig: {
+    port: 3000,
   }
 }
