@@ -34,4 +34,4 @@ yarn-error.log*
 *.tsbuildinfo
 
 # config
-/src/configs/config.tsx
+
