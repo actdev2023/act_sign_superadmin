@@ -43,7 +43,7 @@ import { DateType } from 'src/types/forms/reactDatepickerTypes';
 import pdfDocuments from '.';
 
 
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+
 
 interface Stamp {
     x: number;
@@ -159,6 +159,7 @@ const PDFDocumentUpload = ({ popperPlacement }: { popperPlacement: ReactDatePick
     };
     
     const onDrop = async (acceptFiles: File[]) => {
+        pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
         const file = acceptFiles[0];
         setUploadedFile(file);
         const fileUrl = URL.createObjectURL(file);
