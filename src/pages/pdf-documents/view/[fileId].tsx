@@ -110,7 +110,7 @@ function PDFDocumentView() {
     
 
     useEffect(() => {
-        pdfjs.GlobalWorkerOptions.workerSrc = `http://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+        pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
         fetchFileDetails();
         // const fetchData = async () => {
@@ -132,7 +132,7 @@ function PDFDocumentView() {
         const fetchFileDetails = async () => {
             try {
                 const fileData = await fetchFileFromAPI(fileId as string);
-                setFileUrl(`http://localhost:8080/uploads/documents/${fileData.fileUrl}`);
+                setFileUrl(`${API_URL}/uploads/documents/${fileData.fileUrl}`);
                 setStampPosition(fileData.stampPosition);
                 setDateTextPosition(fileData.dateTextPosition);
                 setDateText(fileData.dateText)
