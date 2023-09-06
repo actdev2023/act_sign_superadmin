@@ -41,9 +41,9 @@ const SignaturePage = () => {
  
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [signature, setSignature] = useState('');
-    const handleViewClick = (fileId: string) => {
+    // const handleViewClick = (fileId: string) => {
        
-     }
+    //  }
     
     useEffect(() => {
         const fetchData = async () => {
@@ -102,7 +102,7 @@ const SignaturePage = () => {
             />
             
             <Grid item xs={12}>
-                <TableSignaureServerSide onView={handleViewClick} />
+                {/* <TableSignaureServerSide onView={handleViewClick} /> */}
             </Grid>          
         </Grid>
   )
