@@ -424,7 +424,7 @@ const TablePdfServerSide: React.FC<FilesTableProps> = ({ onView }) => {
   return (
     <Card>
       
-      <Button variant='contained' color='primary' onClick={handleSignAllClick} sx={{ ml:5, mt:4 }}>Sign All</Button>
+      {/* <Button variant='contained' color='primary' onClick={handleSignAllClick} sx={{ ml:5, mt:4 }}>Sign All</Button> */}
       <DataGrid
         autoHeight
         pagination 
